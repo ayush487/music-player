@@ -82,25 +82,40 @@ const nextSong = () => {
 // On Load
 loadSong(songs[songIndex]);
 
+const updateCurrentTimeDuration = (duration, currentTime) => {
+    const durationMinutes = Math.floor(duration/60)
+    let durationSeconds = Math.floor(duration%60)
+    durationSeconds = (durationSeconds<10) ? `0${durationSeconds}` : `${durationSeconds}`
+    if(durationSeconds && durationMinutes){
+        durationEl.textContent = `${durationMinutes}:${durationSeconds}`;
+    }
+    const currentTimeMinutes = Math.floor(currentTime/60)
+    let currentTimeSeconds = Math.floor(currentTime%60)
+    currentTimeSeconds = (currentTimeSeconds<10) ? `0${currentTimeSeconds}` : `${currentTimeSeconds}`
+    currentTimeEl.textContent = `${currentTimeMinutes}:${currentTimeSeconds}`
+}
+
 const updateProgressBar = (e) => {
     if(isPlaying) {
         const {duration , currentTime} = e.srcElement
         const progressPercent = (currentTime/duration) * 100;
         progress.style.width = `${progressPercent}%`
-        const durationMinutes = Math.floor(duration/60)
-        let durationSeconds = Math.floor(duration%60)
-        durationSeconds = (durationSeconds<10) ? `0${durationSeconds}` : `${durationSeconds}`
-        if(durationSeconds && durationMinutes){
-            durationEl.textContent = `${durationMinutes}:${durationSeconds}`;
-        }
-        const currentTimeMinutes = Math.floor(currentTime/60)
-        let currentTimeSeconds = Math.floor(currentTime%60)
-        currentTimeSeconds = (currentTimeSeconds<10) ? `0${currentTimeSeconds}` : `${currentTimeSeconds}`
-        currentTimeEl.textContent = `${currentTimeMinutes}:${currentTimeSeconds}`
+        updateCurrentTimeDuration(duration, currentTime)
     }
+}
+
+const setProgressBar = (e) => {
+    const width = e.srcElement.clientWidth;
+    const clickX = e.offsetX;
+    const {duration} = music
+    music.currentTime = clickX/width * duration;
+    progress.style.width = `${clickX/width * 100}%`
+    updateCurrentTimeDuration(duration, music.currentTime)
 }
 
 // Event Listeners
 prevBtn.addEventListener('click', prevSong)
 nextBtn.addEventListener('click', nextSong)
 music.addEventListener('timeupdate', updateProgressBar)
+progressContainer.addEventListener('click', setProgressBar)
+music.addEventListener('ended', nextSong)
